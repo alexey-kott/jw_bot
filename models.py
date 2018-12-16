@@ -1,9 +1,16 @@
+from enum import Enum
 from typing import Union
 
 from aiogram.types import Message, CallbackQuery
-from peewee import Model, SqliteDatabase, TextField, IntegerField, CompositeKey
+from peewee import Model, SqliteDatabase, TextField, IntegerField, CompositeKey, DateField, CharField, ForeignKeyField
 
 db = SqliteDatabase('db.sqlite3')
+
+
+# class Journal(Enum):
+#     # такие обозначения используются на сайте
+#     AWAKE = 'g'  # Awake! (Пробудитесь!)
+#     WATCHTOWER = 'wp'  # Watchtower (Сторожевая башня)
 
 
 class BaseModel(Model):
@@ -32,9 +39,29 @@ class User(BaseModel):
             raise NotImplementedError
 
 
+class Journal(BaseModel):
+    symbol = CharField(max_length=2)
+    title = TextField()
+
+
+class JournalIssue(BaseModel):
+    #  журнальный выпуск
+    journal = ForeignKeyField(Journal, backref='issues')
+    year = IntegerField()
+    number = IntegerField()
+    title = TextField()
+    annotation = TextField()
+    link = TextField(unique=True)
+
+
 class Article(BaseModel):
-    site_url = TextField(unique=True)
+    title = TextField(unique=True)
+    url = TextField(unique=True)
     telegraph_url = TextField()
+    journal_issue = ForeignKeyField(JournalIssue, backref='articles', null=True)
+    content_hash = TextField()  # хэш от суммы компонентов статьи (иллюстрация, заголовок, текст),
+                        #  если он изменился -- заново экспортируем статью в telegraph
+
 
 
 class Routing(BaseModel):

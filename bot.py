@@ -1,6 +1,8 @@
+import asyncio
 import json
+import re
 from datetime import datetime
-from typing import Union, Dict
+from typing import Union, Dict, Tuple
 
 from aiogram import Bot
 from aiogram.types import Message, CallbackQuery
@@ -9,15 +11,14 @@ from aiogram.utils import executor
 from aiogram.types.inline_keyboard import InlineKeyboardButton, InlineKeyboardMarkup
 from attr import attrs
 
-from common_functions import init_routing, get_articles
+from common_functions import init_routing, parse_journal_issue
 from config import BOT_TOKEN
-from models import User, Routing, Article
+from models import User, Routing, Article, Journal, JournalIssue
 import string_resources as str_res
+from jw_watcher import JWWatcher
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(bot)
-
-init_routing()
 
 @attrs
 class CallbackData:
@@ -30,6 +31,10 @@ async def init(message: Message):
     User.create_table(fail_silently=True)
     Article.create_table(fail_silently=True)
     Routing.create_table(fail_silently=True)
+    Journal.create_table(fail_silently=True)
+    JournalIssue.create_table(fail_silently=True)
+
+    set_db_init_values()
 
 
 @dp.message_handler(commands=['reset'])
@@ -68,7 +73,7 @@ async def get_article(callback: CallbackQuery):
 
 async def get_journal(callback: CallbackQuery):
     data = json.loads(callback.data)
-    articles = await get_articles(data['name'], data['year'])
+    articles = await parse_journal_issue(data['name'], data['year'])
 
     callback_data = {
         'action': 'get_article'
@@ -82,8 +87,6 @@ async def get_journal(callback: CallbackQuery):
     keyboard.add(InlineKeyboardButton(text='Главное меню', callback_data=json.dumps({'action': 'start'})))
 
     await bot.send_message(callback.from_user.id, 'Выберите статью:', reply_markup=keyboard)
-
-
 
 
 async def select_journal_year(callback: CallbackQuery):
@@ -126,6 +129,8 @@ async def text_handler(message: Message):
     except Exception as e:
         print(e)
 
-
 if __name__ == '__main__':
+    event_loop = asyncio.get_event_loop()
+    jw_watcher = JWWatcher(loop=event_loop)
+    jw_watcher.start()
     executor.start_polling(dp)

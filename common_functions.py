@@ -1,15 +1,20 @@
+import json
 import re
+from hashlib import sha1
 
 import sqlite3
 from typing import Tuple, List
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 
 from aiohttp import ClientSession
+from telegraph import Telegraph
+from telegraph.utils import html_to_nodes
 
-from models import Article
+from config import TELEGRAPH_USER_TOKEN
+from models import Article, JournalIssue
 
-MAIN_URL = "https://www.jw.org/"
+MAIN_URL = "https://www.jw.org"
 
 
 def init_routing():
@@ -27,27 +32,142 @@ def init_routing():
         conn.close()
 
 
+def add_default_journals():
+    pass
+
+
+def set_init_db_values():
+    init_routing()
+
+    add_default_journals()
+
+
 async def get_page_source(url, params=None):
     async with ClientSession() as session:
         async with session.get(url, params=params) as response:
             return await response.text()
 
 
-async def create_or_get_article(href: str) -> int:
-    try:
-        article = Article.select().where(Article.site_url == href).get()
-        return article
-    except Exception:
-        pass
+async def post_to_telegraph(href: str):
     page_source = await get_page_source(f"{MAIN_URL}{href}")
     soup = BeautifulSoup(page_source, 'lxml')
 
-    print(soup.find_all(class_='contentBody'))
+    telegraph = Telegraph()
+
+
+def parse_context_title(title: str) -> Tuple[str, str, str]:
+    [s.extract() for s in title('span')]
+    match = re.search("(?P<number>(?<=№\s)\d+)\s(?P<year>\d{4})\s+\|\s(?P<title>.*)", title.text)
+
+    return match.group('number'), match.group('year'), match.group('title')
+
+
+def prepare_items(items: List[Tag]) -> str:
+    for item in items:
+        if item.name == 'h1':
+            item.name = 'h3'
+        if item.name == 'h2':
+            item.name = 'h4'
+        if item.span is not None:
+            item.span.decompose()
+
+    return ''.join([str(item) for item in items])
+
+
+def calc_article_hash(items: List[Tag]) -> str:
+    s = ''.join([str(i) for i in items]).encode('utf-8')
+    hash_object = sha1(s)
+
+    return hash_object.hexdigest()
+
+
+async def export_article_to_telegraph(link: str) -> Article:
+    page_source = await get_page_source(f"{MAIN_URL}{link}")
+
+    soup = BeautifulSoup(page_source, 'lxml')
+    banner = soup.find('div', {'class': 'lsrBannerImage'})
+    banner_img = banner.find('img')
+    banner_img['src'] = banner_img['src'].replace('_xs.', '_lg.')
+    banner_img_src = banner_img['src'].replace('_xs.', '_lg.')  # костыль, связанный с тем, что сайт не может определить
+    # разрешение экрана юзера и по дефолту отдаёт самые
+    # маленькие изображения
+
+    header = soup.find('div', {'id': 'article'}).find('header').find('h1')
+    content = soup.find('div', {'id': 'article'}).find('div', {'class': 'docSubContent'}).find_all('p')
+
+    telegraph = Telegraph(TELEGRAPH_USER_TOKEN)
+
+    items = []
+    items.append(banner_img)
+    items.append(header)
+    items.extend(content)
+
+    current_article_hash = calc_article_hash(items)
+
+    # article = Article.create(url=link, title='dlkcmlsd', telegraph_url='dcsdkms', content_hash='sdcsdcs')
+    # article.save()
+    article = Article.get_or_none(Article.url == 'dcdscs')
+
+    html_content = prepare_items(items)
+    prepared_telegraph_page = ''.join(html_content)
+
+    if not article:
+        telegraph_response = telegraph.create_page(title=header.text, html_content=prepared_telegraph_page)
+        # print('RESPONSE:', telegraph_response)
+        new_article = Article.create(title=telegraph_response['title'],
+                                     url=link,
+                                     telegraph_url=telegraph_response['url'],
+                                     journal_issue = None,
+                                     content_hash = current_article_hash)
+        # article._hash = current_article_hash
+        # article.telegraph_url = telegraph_response['url']
+        # article.title = telegraph_response['title']
+        new_article.save()
+        print('NEW ARTICLE: ', new_article)
+    elif article.content_hash != current_article_hash:
+        telegraph_raw_response = telegraph.edit_page(path=article.telegraph_url, title=header.text,
+                                                     html_content=prepared_telegraph_page)
+        article.content_hash = current_article_hash
+        article.save()
+        print('EDITED ARTICLE: ', article)
+        print(telegraph_raw_response)
+    # print(telegraph_response)
+
+
+async def create_or_get_journal_issue(href: str) -> int:
+    # try:
+    #     article = Article.select().where(Article.site_url == href).get()
+    #     return article
+    # except Exception:
+    #     pass
+
+    page_source = await get_page_source(f"{MAIN_URL}{href}")
+    soup = BeautifulSoup(page_source, 'lxml')
+
+    main_frame = soup.find('div', {'id': 'article'})
+    # print(main_frame)
+
+    context_title = main_frame.find('h1')
+    number, year, title = parse_context_title(context_title)
+
+    section1 = main_frame.find('div', {'id': 'section1'})  # div with id=section1 is annotation with header
+    header = section1.find('h2', {'id': 'p2'})
+    synopsis = section1.find('p', {'id': 'p3'})
+    annotation = f"**{header.text}**\n\n{synopsis.text}"
+
+    journal_issue = JournalIssue.get_or_none(JournalIssue.journal == '')
+
+    article_items = main_frame.find_all('div', {'class': 'PublicationArticle'})
+    for item in article_items:
+        item_link = item.find('a')
+        article = await export_article_to_telegraph(item_link['href'])
+        article.journal_issue = journal_issue
+        article.save()
 
     return 1
 
 
-async def get_articles(journal_name: str, year: int) -> List[Tuple[str, str]]:
+async def parse_journal_issue(journal_name: str, year: int) -> List[Tuple[str, str]]:
     params = {
         'contentLanguageFilter': 'ru',
         'pubFilter': journal_name,
@@ -58,8 +178,7 @@ async def get_articles(journal_name: str, year: int) -> List[Tuple[str, str]]:
 
     articles = []
     for item in soup.find_all(class_='publicationDesc'):
-        article_id = await create_or_get_article(item.h3.a['href'])
-        articles.append((item.h3.a.text, article_id))
+        await create_or_get_journal_issue(item.h3.a['href'])
+        # articles.append((item.h3.a.text, article_id))
 
     return articles
-
