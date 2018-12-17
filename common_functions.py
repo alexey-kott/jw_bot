@@ -12,7 +12,7 @@ from telegraph import Telegraph
 from telegraph.utils import html_to_nodes
 
 from config import TELEGRAPH_USER_TOKEN
-from models import Article, JournalIssue
+from models import Article, JournalIssue, Journal
 
 MAIN_URL = "https://www.jw.org"
 
@@ -95,6 +95,7 @@ async def export_article_to_telegraph(link: str) -> Article:
     header = soup.find('div', {'id': 'article'}).find('header').find('h1')
     content = soup.find('div', {'id': 'article'}).find('div', {'class': 'docSubContent'}).find_all('p')
 
+    return
     telegraph = Telegraph(TELEGRAPH_USER_TOKEN)
 
     items = []
@@ -134,18 +135,11 @@ async def export_article_to_telegraph(link: str) -> Article:
     # print(telegraph_response)
 
 
-async def create_or_get_journal_issue(href: str) -> int:
-    # try:
-    #     article = Article.select().where(Article.site_url == href).get()
-    #     return article
-    # except Exception:
-    #     pass
-
+async def check_journal_issue_presence(href: str) -> int:
     page_source = await get_page_source(f"{MAIN_URL}{href}")
     soup = BeautifulSoup(page_source, 'lxml')
 
     main_frame = soup.find('div', {'id': 'article'})
-    # print(main_frame)
 
     context_title = main_frame.find('h1')
     number, year, title = parse_context_title(context_title)
@@ -167,10 +161,29 @@ async def create_or_get_journal_issue(href: str) -> int:
     return 1
 
 
-async def parse_journal_issue(journal_name: str, year: int) -> List[Tuple[str, str]]:
+async def get_journal_list() -> None:
+    '''Получаем список журналов с их обозначениями, проверяем не появилось ли чего-то нового (скорее
+    всего нет, но функция в первую очередь необходима при первичном запуске приложения)
+    '''
+    page_source = await get_page_source(f"{MAIN_URL}/ru/публикации/журналы/")
+    soup = BeautifulSoup(page_source, 'lxml')
+
+    journal_filter = soup.find('select', {'id': 'pubFilter'})
+    for item in journal_filter.find_all('option'):
+        if item['value']:
+            if not Journal.get_or_none(Journal.symbol == item['value']):
+                journal = Journal.create(symbol=item['value'],
+                                         title=item.text,
+                                         priority=int(item['data-priority']))
+                journal.save()
+
+    return Journal.select()
+
+
+async def parse_journal_issue(journal: Journal, year: int) -> List[Tuple[str, str]]:
     params = {
         'contentLanguageFilter': 'ru',
-        'pubFilter': journal_name,
+        'pubFilter': journal.symbol,
         'yearFilter': year
     }
     page_source = await get_page_source(f"{MAIN_URL}/ru/публикации/журналы/", params=params)
@@ -178,7 +191,7 @@ async def parse_journal_issue(journal_name: str, year: int) -> List[Tuple[str, s
 
     articles = []
     for item in soup.find_all(class_='publicationDesc'):
-        await create_or_get_journal_issue(item.h3.a['href'])
+        await check_journal_issue_presence(item.h3.a['href'])
         # articles.append((item.h3.a.text, article_id))
 
     return articles

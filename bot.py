@@ -34,7 +34,7 @@ async def init(message: Message):
     Journal.create_table(fail_silently=True)
     JournalIssue.create_table(fail_silently=True)
 
-    set_db_init_values()
+    # set_db_init_values()
 
 
 @dp.message_handler(commands=['reset'])

@@ -40,8 +40,9 @@ class User(BaseModel):
 
 
 class Journal(BaseModel):
-    symbol = CharField(max_length=2)
+    symbol = CharField(max_length=2, unique=True)
     title = TextField()
+    priority = IntegerField()
 
 
 class JournalIssue(BaseModel):
@@ -61,7 +62,6 @@ class Article(BaseModel):
     journal_issue = ForeignKeyField(JournalIssue, backref='articles', null=True)
     content_hash = TextField()  # хэш от суммы компонентов статьи (иллюстрация, заголовок, текст),
                         #  если он изменился -- заново экспортируем статью в telegraph
-
 
 
 class Routing(BaseModel):
