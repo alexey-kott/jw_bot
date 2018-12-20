@@ -1,16 +1,9 @@
-from enum import Enum
 from typing import Union
 
 from aiogram.types import Message, CallbackQuery
-from peewee import Model, SqliteDatabase, TextField, IntegerField, CompositeKey, DateField, CharField, ForeignKeyField
+from peewee import Model, SqliteDatabase, TextField, IntegerField, CompositeKey, CharField, ForeignKeyField, BooleanField
 
 db = SqliteDatabase('db.sqlite3')
-
-
-# class Journal(Enum):
-#     # такие обозначения используются на сайте
-#     AWAKE = 'g'  # Awake! (Пробудитесь!)
-#     WATCHTOWER = 'wp'  # Watchtower (Сторожевая башня)
 
 
 class BaseModel(Model):
@@ -21,9 +14,10 @@ class BaseModel(Model):
 class User(BaseModel):
     user_id = IntegerField(primary_key=True)
     first_name = TextField()
-    last_name = TextField(null=True)
+    last_name = TextField(default='')
     username = TextField(null=True)
     state = TextField(default='default')
+    access = BooleanField(default=False)
 
     @classmethod
     def cog(cls, data: Union[Message, CallbackQuery]) -> 'User':
@@ -37,6 +31,10 @@ class User(BaseModel):
                                   last_name=data.from_user.last_name)
         else:
             raise NotImplementedError
+
+
+class ACL(BaseModel):  # Access Control List
+    pass
 
 
 class Journal(BaseModel):

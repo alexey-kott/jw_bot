@@ -8,6 +8,7 @@ from typing import Tuple, List
 from bs4 import BeautifulSoup, Tag
 
 from aiohttp import ClientSession
+from peewee import ModelSelect
 from telegraph import Telegraph
 from telegraph.utils import html_to_nodes
 
@@ -32,27 +33,14 @@ def init_routing():
         conn.close()
 
 
-def add_default_journals():
-    pass
-
-
 def set_init_db_values():
     init_routing()
-
-    add_default_journals()
 
 
 async def get_page_source(url, params=None):
     async with ClientSession() as session:
         async with session.get(url, params=params) as response:
             return await response.text()
-
-
-async def post_to_telegraph(href: str):
-    page_source = await get_page_source(f"{MAIN_URL}{href}")
-    soup = BeautifulSoup(page_source, 'lxml')
-
-    telegraph = Telegraph()
 
 
 def parse_context_title(title: str) -> Tuple[str, str, str]:
@@ -63,13 +51,23 @@ def parse_context_title(title: str) -> Tuple[str, str, str]:
 
 
 def prepare_items(items: List[Tag]) -> str:
+    AVAILABLE_TAGS = ['h1', 'h2', 'h3', 'h4', 'hr', 'img', 'p', 'ul', 'ol']
+
     for item in items:
-        if item.name == 'h1':
-            item.name = 'h3'
-        if item.name == 'h2':
-            item.name = 'h4'
-        if item.span is not None:
-            item.span.decompose()
+        # print(item)
+
+        for match in item.find_all('span'):
+            match.unwrap()
+        for tag in item.find_all(['h1', 'h2', 'span']):
+            if tag.name == 'h1':
+                tag.name = 'h3'
+            if tag.name == 'h2':
+                tag.name = 'h4'
+        #
+        #     if tag.span is not None:
+        #         tag.span.decompose()
+
+    # print(items)
 
     return ''.join([str(item) for item in items])
 
@@ -81,7 +79,7 @@ def calc_article_hash(items: List[Tag]) -> str:
     return hash_object.hexdigest()
 
 
-async def export_article_to_telegraph(link: str) -> Article:
+async def export_article_to_telegraph(journal_issue: JournalIssue, link: str) -> Article:
     page_source = await get_page_source(f"{MAIN_URL}{link}")
 
     soup = BeautifulSoup(page_source, 'lxml')
@@ -95,48 +93,41 @@ async def export_article_to_telegraph(link: str) -> Article:
     header = soup.find('div', {'id': 'article'}).find('header').find('h1')
     content = soup.find('div', {'id': 'article'}).find('div', {'class': 'docSubContent'}).find_all('p')
 
-    return
     telegraph = Telegraph(TELEGRAPH_USER_TOKEN)
 
     items = []
     items.append(banner_img)
-    items.append(header)
+    # items.append(header)
     items.extend(content)
 
     current_article_hash = calc_article_hash(items)
 
-    # article = Article.create(url=link, title='dlkcmlsd', telegraph_url='dcsdkms', content_hash='sdcsdcs')
-    # article.save()
-    article = Article.get_or_none(Article.url == 'dcdscs')
+    article = Article.get_or_none(Article.url == link)
 
     html_content = prepare_items(items)
     prepared_telegraph_page = ''.join(html_content)
 
     if not article:
         telegraph_response = telegraph.create_page(title=header.text, html_content=prepared_telegraph_page)
-        # print('RESPONSE:', telegraph_response)
         new_article = Article.create(title=telegraph_response['title'],
                                      url=link,
                                      telegraph_url=telegraph_response['url'],
-                                     journal_issue = None,
-                                     content_hash = current_article_hash)
-        # article._hash = current_article_hash
-        # article.telegraph_url = telegraph_response['url']
-        # article.title = telegraph_response['title']
+                                     journal_issue=journal_issue,
+                                     content_hash=current_article_hash)
         new_article.save()
-        print('NEW ARTICLE: ', new_article)
+        print('NEW ARTICLE: ', new_article.telegraph_url)
     elif article.content_hash != current_article_hash:
+        print('Article ', article, ' changed')
         telegraph_raw_response = telegraph.edit_page(path=article.telegraph_url, title=header.text,
                                                      html_content=prepared_telegraph_page)
         article.content_hash = current_article_hash
         article.save()
         print('EDITED ARTICLE: ', article)
         print(telegraph_raw_response)
-    # print(telegraph_response)
 
 
-async def check_journal_issue_presence(href: str) -> int:
-    page_source = await get_page_source(f"{MAIN_URL}{href}")
+async def check_journal_issue_availability(journal: Journal, link: str) -> int:
+    page_source = await get_page_source(f"{MAIN_URL}{link}")
     soup = BeautifulSoup(page_source, 'lxml')
 
     main_frame = soup.find('div', {'id': 'article'})
@@ -149,19 +140,27 @@ async def check_journal_issue_presence(href: str) -> int:
     synopsis = section1.find('p', {'id': 'p3'})
     annotation = f"**{header.text}**\n\n{synopsis.text}"
 
-    journal_issue = JournalIssue.get_or_none(JournalIssue.journal == '')
+    journal_issue = JournalIssue.get_or_none(JournalIssue.journal == journal,
+                                             JournalIssue.year == year,
+                                             JournalIssue.number == number)
+
+    if not journal_issue:
+        JournalIssue.create(journal=journal,
+                            year=year,
+                            number=number,
+                            title=title,
+                            annotation=annotation,
+                            link=link)
 
     article_items = main_frame.find_all('div', {'class': 'PublicationArticle'})
     for item in article_items:
-        item_link = item.find('a')
-        article = await export_article_to_telegraph(item_link['href'])
-        article.journal_issue = journal_issue
-        article.save()
+        article_link = item.find('a')
+        article = await export_article_to_telegraph(journal_issue, article_link['href'])
 
     return 1
 
 
-async def get_journal_list() -> None:
+async def get_journal_list() -> ModelSelect:
     '''Получаем список журналов с их обозначениями, проверяем не появилось ли чего-то нового (скорее
     всего нет, но функция в первую очередь необходима при первичном запуске приложения)
     '''
@@ -191,7 +190,7 @@ async def parse_journal_issue(journal: Journal, year: int) -> List[Tuple[str, st
 
     articles = []
     for item in soup.find_all(class_='publicationDesc'):
-        await check_journal_issue_presence(item.h3.a['href'])
+        await check_journal_issue_availability(journal, item.h3.a['href'])
         # articles.append((item.h3.a.text, article_id))
 
     return articles

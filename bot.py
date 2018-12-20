@@ -12,13 +12,14 @@ from aiogram.types.inline_keyboard import InlineKeyboardButton, InlineKeyboardMa
 from attr import attrs
 
 from common_functions import init_routing, parse_journal_issue
-from config import BOT_TOKEN
+from config import BOT_TOKEN, ACCESS_CONTROL_CHANNEL_ID
 from models import User, Routing, Article, Journal, JournalIssue
 import string_resources as str_res
 from jw_watcher import JWWatcher
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(bot)
+
 
 @attrs
 class CallbackData:
@@ -44,14 +45,32 @@ async def reset(message: Message):
     user.save()
 
 
+async def send_access_request(user):
+    keyboard = InlineKeyboardMarkup()
+    accept_access_btn = InlineKeyboardButton(text='Принять', callback_data=json.dumps({'action': 'access',
+                                                                                       'user': user.user_id,
+                                                                                       'access_mode': True}))
+    cancel_access_btn = InlineKeyboardButton(text='Отказать', callback_data=json.dumps({'action': 'access',
+                                                                                        'user': user.user_id,
+                                                                                        'mode': False}))
+    keyboard.row(accept_access_btn, cancel_access_btn)
+    await bot.send_message(ACCESS_CONTROL_CHANNEL_ID,
+                           f"{user.first_name} {user.last_name} (@{user.username})",
+                           reply_markup=keyboard)
+
+
 @dp.message_handler(commands=['start'])
 async def start(message: Message):
     user = User.cog(message)
-    keyboard = InlineKeyboardMarkup()
-    keyboard.add(InlineKeyboardButton(text='Библия онлайн', callback_data=json.dumps({'action': 'select_bible'})))
-    keyboard.add(InlineKeyboardButton(text='Журналы', callback_data=json.dumps({'action': 'select_journal'})))
-    keyboard.add(InlineKeyboardButton(text='Книги и брошюры', callback_data=json.dumps({'action': 'books_and_brochures'})))
-    await bot.send_message(user.user_id, "Выберите тип публикации", reply_markup=keyboard)
+    await message.reply(f"Чтобы получить доступ к материалам Ваше участие должно быть одобрено администратором."
+                        f"Запрос на доступ был отправлен. Бот известит Вас как только администратор даст согласие.")
+
+    # keyboard = InlineKeyboardMarkup()
+    # keyboard.add(InlineKeyboardButton(text='Библия онлайн', callback_data=json.dumps({'action': 'select_bible'})))
+    # keyboard.add(InlineKeyboardButton(text='Журналы', callback_data=json.dumps({'action': 'select_journal'})))
+    # keyboard.add(
+    #     InlineKeyboardButton(text='Книги и брошюры', callback_data=json.dumps({'action': 'books_and_brochures'})))
+    # await bot.send_message(user.user_id, "Выберите тип публикации", reply_markup=keyboard)
 
 
 async def select_journal(callback: CallbackQuery):
@@ -106,7 +125,6 @@ async def select_journal_year(callback: CallbackQuery):
     await bot.send_message(callback.from_user.id, 'Выберите год:', reply_markup=keyboard)
 
 
-
 @dp.callback_query_handler()
 async def callback_handler(callback: CallbackQuery):
     print(callback.data)
@@ -118,6 +136,7 @@ async def callback_handler(callback: CallbackQuery):
 
 @dp.message_handler(content_types=['text'])
 async def text_handler(message: Message):
+    print(message)
     user = User.cog(message)
 
     try:
@@ -129,8 +148,9 @@ async def text_handler(message: Message):
     except Exception as e:
         print(e)
 
+
 if __name__ == '__main__':
     event_loop = asyncio.get_event_loop()
     jw_watcher = JWWatcher(loop=event_loop)
-    jw_watcher.start()
+    # jw_watcher.start()
     executor.start_polling(dp)
