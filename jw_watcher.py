@@ -15,7 +15,7 @@ class JWWatcher(Thread):
 
         journal_list = await get_journal_list()
 
-        for year in range(current_year-1, 2000, -1):
+        for year in range(current_year, 2000, -1):
             for journal in journal_list:
                 await parse_journal_issue(journal=journal, year=year)
 
