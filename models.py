@@ -14,7 +14,7 @@ class BaseModel(Model):
 class User(BaseModel):
     user_id = IntegerField(primary_key=True)
     first_name = TextField()
-    last_name = TextField(default='')
+    last_name = TextField(default='', null=True)
     username = TextField(null=True)
     state = TextField(default='default')
     access = BooleanField(default=False)
@@ -26,10 +26,15 @@ class User(BaseModel):
             try:
                 return cls.get(user_id=data.from_user.id)
             except Exception as e:
-                return cls.create(user_id=data.from_user.id,
-                                  username=data.from_user.username,
-                                  first_name=data.from_user.first_name,
-                                  last_name=data.from_user.last_name)
+                try:
+                    obj = cls.create(user_id=data.from_user.id,
+                                      username=data.from_user.username,
+                                      first_name=data.from_user.first_name,
+                                      last_name=data.from_user.last_name)
+                except Exception as e:
+                    print(e)
+
+                return obj
         else:
             raise NotImplementedError
 
@@ -58,7 +63,7 @@ class Article(BaseModel):
     title = TextField(unique=True)
     url = TextField(unique=True)
     telegraph_url = TextField()
-    journal_issue = ForeignKeyField(JournalIssue, backref='articles', null=True)
+    journal_issue = ForeignKeyField(JournalIssue, backref='articles')
     content_hash = TextField()  # хэш от суммы компонентов статьи (иллюстрация, заголовок, текст),
                         #  если он изменился -- заново экспортируем статью в telegraph
 
