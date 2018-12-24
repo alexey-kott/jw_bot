@@ -144,7 +144,13 @@ async def check_journal_issue_availability(journal: Journal, link: str) -> int:
     section1 = main_frame.find('div', {'id': 'section1'})  # div with id=section1 is annotation with header
     header = section1.find('h2', {'id': 'p2'})
     synopsis = section1.find('p', {'id': 'p3'})
-    annotation = f"**{header.text}**\n\n{synopsis.text}"
+
+    if header is not None:
+        annotation = f"{header.text}\n\n{synopsis.text}"
+    else:
+        annotation = synopsis.text
+
+
 
     journal_issue = JournalIssue.get_or_none(JournalIssue.journal == journal,
                                              JournalIssue.year == year,
@@ -158,10 +164,11 @@ async def check_journal_issue_availability(journal: Journal, link: str) -> int:
                             annotation=annotation,
                             link=link)
 
+    #
     article_items = main_frame.find_all('div', {'class': 'PublicationArticle'})
+
     for item in article_items:
         article_link = item.find('a')
-        print(f"{MAIN_URL}{article_link['href']}")
         try:
             await export_article_to_telegraph(journal_issue, article_link['href'])
         except Exception as e:
@@ -199,6 +206,7 @@ async def parse_journal_issue(journal: Journal, year: int) -> List[Tuple[str, st
 
     articles = []
     for item in soup.find_all(class_='publicationDesc'):
+        print(item.text)
         await check_journal_issue_availability(journal, item.h3.a['href'])
 
     return articles

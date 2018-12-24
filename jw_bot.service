@@ -1,0 +1,12 @@
+[Unit]
+Description=jw_bot
+
+[Service]
+Type=simple
+ExecStart=/home/user/jw_bot/venv/bin/python /home/user/jw_bot/bot.py
+WorkingDirectory=/home/user/jw_bot
+Restart=always
+RestartSec=2
+
+[Install]
+Alias=jw_bot
