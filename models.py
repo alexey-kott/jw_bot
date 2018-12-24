@@ -18,6 +18,7 @@ class User(BaseModel):
     username = TextField(null=True)
     state = TextField(default='default')
     access = BooleanField(default=False)
+    access_msg_id = IntegerField(null=True)
 
     @classmethod
     def cog(cls, data: Union[Message, CallbackQuery]) -> 'User':

@@ -1,4 +1,5 @@
 import json
+import logging
 import re
 from hashlib import sha1
 
@@ -16,6 +17,13 @@ from config import TELEGRAPH_USER_TOKEN
 from models import Article, JournalIssue, Journal
 
 MAIN_URL = "https://www.jw.org"
+
+logging.basicConfig(level=logging.ERROR,
+                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                    datefmt='%m-%d %H:%M',
+                    filename='./logs/log')
+logger = logging.getLogger('jwwatcher')
+logger.setLevel(logging.INFO)
 
 
 def init_routing():
@@ -80,23 +88,24 @@ def calc_article_hash(items: List[Tag]) -> str:
 
 
 async def export_article_to_telegraph(journal_issue: JournalIssue, link: str) -> Article:
+    items = []
     page_source = await get_page_source(f"{MAIN_URL}{link}")
 
     soup = BeautifulSoup(page_source, 'lxml')
     banner = soup.find('div', {'class': 'lsrBannerImage'})
-    banner_img = banner.find('img')
-    banner_img['src'] = banner_img['src'].replace('_xs.', '_lg.')
-    banner_img_src = banner_img['src'].replace('_xs.', '_lg.')  # костыль, связанный с тем, что сайт не может определить
-    # разрешение экрана юзера и по дефолту отдаёт самые
-    # маленькие изображения
+    if banner is not None:
+        banner_img = banner.find('img')
+        banner_img['src'] = banner_img['src'].replace('_xs.', '_lg.')
+        banner_img_src = banner_img['src'].replace('_xs.', '_lg.')  # костыль, связанный с тем, что сайт не может определить
+                                                                    # разрешение экрана юзера и по дефолту отдаёт самые
+                                                                    # маленькие изображения
+        items.append(banner_img)
 
     header = soup.find('div', {'id': 'article'}).find('header').find('h1')
     content = soup.find('div', {'id': 'article'}).find('div', {'class': 'docSubContent'}).find_all('p')
 
     telegraph = Telegraph(TELEGRAPH_USER_TOKEN)
 
-    items = []
-    items.append(banner_img)
     # items.append(header)
     items.extend(content)
 
@@ -155,9 +164,11 @@ async def check_journal_issue_availability(journal: Journal, link: str) -> int:
     article_items = main_frame.find_all('div', {'class': 'PublicationArticle'})
     for item in article_items:
         article_link = item.find('a')
-        article = await export_article_to_telegraph(journal_issue, article_link['href'])
-
-    return 1
+        try:
+            await export_article_to_telegraph(journal_issue, article_link['href'])
+        except Exception as e:
+            print(e)
+            logger.exception(f"Article wasn't parsed: {MAIN_URL}{article_link['href']}")
 
 
 async def get_journal_list() -> ModelSelect:
