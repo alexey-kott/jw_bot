@@ -94,13 +94,16 @@ async def export_article_to_telegraph(journal_issue: JournalIssue, link: str) ->
     if banner is not None:
         banner_img = banner.find('img')
         banner_img['src'] = banner_img['src'].replace('_xs.', '_lg.')
-        banner_img_src = banner_img['src'].replace('_xs.', '_lg.')  # костыль, связанный с тем, что сайт не может определить
-                                                                    # разрешение экрана юзера и по дефолту отдаёт самые
-                                                                    # маленькие изображения
+        banner_img_src = banner_img['src'].replace('_xs.',
+                                                   '_lg.')  # костыль, связанный с тем, что сайт
+        # не может определить
+        # разрешение экрана юзера и по дефолту отдаёт самые
+        # маленькие изображения
         items.append(banner_img)
 
     header = soup.find('div', {'id': 'article'}).find('header').find('h1')
-    content = soup.find('div', {'id': 'article'}).find('div', {'class': 'docSubContent'}).find_all('p')
+    content = soup.find('div', {'id': 'article'}).find('div', {'class': 'docSubContent'}).find_all(
+        'p')
 
     telegraph = Telegraph(TELEGRAPH_USER_TOKEN)
 
@@ -114,7 +117,8 @@ async def export_article_to_telegraph(journal_issue: JournalIssue, link: str) ->
     prepared_telegraph_page = ''.join(html_content)
 
     if not article:
-        telegraph_response = telegraph.create_page(title=header.text, html_content=prepared_telegraph_page)
+        telegraph_response = telegraph.create_page(title=header.text,
+                                                   html_content=prepared_telegraph_page)
         new_article = Article.create(title=telegraph_response['title'],
                                      url=link,
                                      telegraph_url=telegraph_response['url'],
@@ -141,7 +145,8 @@ async def check_journal_issue_availability(journal: Journal, link: str) -> int:
     context_title = main_frame.find('h1')
     number, year, title = parse_context_title(context_title)
 
-    section1 = main_frame.find('div', {'id': 'section1'})  # div with id=section1 is annotation with header
+    section1 = main_frame.find('div',
+                               {'id': 'section1'})  # div with id=section1 is annotation with header
     header = section1.find('h2', {'id': 'p2'})
     synopsis = section1.find('p', {'id': 'p3'})
 
@@ -150,19 +155,17 @@ async def check_journal_issue_availability(journal: Journal, link: str) -> int:
     else:
         annotation = synopsis.text
 
-
-
     journal_issue = JournalIssue.get_or_none(JournalIssue.journal == journal,
                                              JournalIssue.year == year,
                                              JournalIssue.number == number)
 
     if not journal_issue:
-        JournalIssue.create(journal=journal,
-                            year=year,
-                            number=number,
-                            title=title,
-                            annotation=annotation,
-                            link=link)
+        journal_issue = JournalIssue.create(journal=journal,
+                                            year=year,
+                                            number=number,
+                                            title=title,
+                                            annotation=annotation,
+                                            link=link)
 
     #
     article_items = main_frame.find_all('div', {'class': 'PublicationArticle'})
