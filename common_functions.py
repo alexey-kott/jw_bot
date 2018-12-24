@@ -75,8 +75,6 @@ def prepare_items(items: List[Tag]) -> str:
         #     if tag.span is not None:
         #         tag.span.decompose()
 
-    # print(items)
-
     return ''.join([str(item) for item in items])
 
 
@@ -106,7 +104,6 @@ async def export_article_to_telegraph(journal_issue: JournalIssue, link: str) ->
 
     telegraph = Telegraph(TELEGRAPH_USER_TOKEN)
 
-    # items.append(header)
     items.extend(content)
 
     current_article_hash = calc_article_hash(items)
@@ -164,6 +161,7 @@ async def check_journal_issue_availability(journal: Journal, link: str) -> int:
     article_items = main_frame.find_all('div', {'class': 'PublicationArticle'})
     for item in article_items:
         article_link = item.find('a')
+        print(f"{MAIN_URL}{article_link['href']}")
         try:
             await export_article_to_telegraph(journal_issue, article_link['href'])
         except Exception as e:
@@ -202,6 +200,5 @@ async def parse_journal_issue(journal: Journal, year: int) -> List[Tuple[str, st
     articles = []
     for item in soup.find_all(class_='publicationDesc'):
         await check_journal_issue_availability(journal, item.h3.a['href'])
-        # articles.append((item.h3.a.text, article_id))
 
     return articles

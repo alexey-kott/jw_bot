@@ -1,4 +1,4 @@
-from asyncio import AbstractEventLoop, sleep
+from asyncio import AbstractEventLoop
 from datetime import datetime
 from threading import Thread
 
@@ -12,16 +12,12 @@ class JWWatcher(Thread):
 
     async def main(self):
         current_year = datetime.now().year
-        # journal_list = {'g': 'Пробудитесь!',
-        #                 'wp': 'Сторожевая башня'}
 
         journal_list = await get_journal_list()
 
         for year in range(current_year, 2000, -1):
             for journal in journal_list:
                 articles = await parse_journal_issue(journal=journal, year=year)
-                # for a in articles:
-                #     print(a)
 
 
     def run(self):

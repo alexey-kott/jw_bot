@@ -3262,3 +3262,555 @@ Traceback (most recent call last):
   File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 2683, in execute_sql
     cursor.execute(sql, params or ())
 peewee.IntegrityError: NOT NULL constraint failed: user.last_name
+12-24 15:10 asyncio      ERROR    Task exception was never retrieved
+future: <Task finished coro=<JWWatcher.main() done, defined at /home/alexkott/Documents/YouDo/jw_bot/jw_watcher.py:13> exception=KeyboardInterrupt()>
+Traceback (most recent call last):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/utils/executor.py", line 245, in start_polling
+    loop.run_forever()
+  File "/usr/lib/python3.7/asyncio/base_events.py", line 528, in run_forever
+    self._run_once()
+  File "/usr/lib/python3.7/asyncio/base_events.py", line 1764, in _run_once
+    handle._run()
+  File "/usr/lib/python3.7/asyncio/events.py", line 88, in _run
+    self._context.run(self._callback, *self._args)
+  File "/home/alexkott/Documents/YouDo/jw_bot/jw_watcher.py", line 22, in main
+    articles = await parse_journal_issue(journal=journal, year=year)
+  File "/home/alexkott/Documents/YouDo/jw_bot/common_functions.py", line 204, in parse_journal_issue
+    await check_journal_issue_availability(journal, item.h3.a['href'])
+  File "/home/alexkott/Documents/YouDo/jw_bot/common_functions.py", line 168, in check_journal_issue_availability
+    await export_article_to_telegraph(journal_issue, article_link['href'])
+  File "/home/alexkott/Documents/YouDo/jw_bot/common_functions.py", line 120, in export_article_to_telegraph
+    telegraph_response = telegraph.create_page(title=header.text, html_content=prepared_telegraph_page)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/telegraph/api.py", line 165, in create_page
+    'return_content': return_content
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/telegraph/api.py", line 31, in method
+    values
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/requests/sessions.py", line 572, in post
+    return self.request('POST', url, data=data, json=json, **kwargs)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/requests/sessions.py", line 524, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/requests/sessions.py", line 637, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/requests/adapters.py", line 449, in send
+    timeout=timeout
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/urllib3/connectionpool.py", line 600, in urlopen
+    chunked=chunked)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/urllib3/connectionpool.py", line 343, in _make_request
+    self._validate_conn(conn)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/urllib3/connectionpool.py", line 839, in _validate_conn
+    conn.connect()
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/urllib3/connection.py", line 301, in connect
+    conn = self._new_conn()
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/urllib3/connection.py", line 159, in _new_conn
+    (self._dns_host, self.port), self.timeout, **extra_kw)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/urllib3/util/connection.py", line 57, in create_connection
+    for res in socket.getaddrinfo(host, port, family, socket.SOCK_STREAM):
+  File "/usr/lib/python3.7/socket.py", line 748, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+KeyboardInterrupt
+12-24 15:15 asyncio      ERROR    Task exception was never retrieved
+future: <Task finished coro=<Dispatcher._process_polling_updates() done, defined at /home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py:249> exception=ChatNotFound('Bad request: chat not found')>
+Traceback (most recent call last):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 256, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates)):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 119, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 137, in process_update
+    return await self.message_handlers.notify(update.message)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "bot.py", line 73, in start
+    await send_access_request(user)
+  File "bot.py", line 62, in send_access_request
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/bot.py", line 203, in send_message
+    result = await self.request(api.Methods.SEND_MESSAGE, payload)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/base.py", line 109, in request
+    proxy=self.proxy, proxy_auth=self.proxy_auth)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 160, in request
+    return await _check_result(method, response)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 71, in _check_result
+    exceptions.BadRequest.detect(description)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/utils/exceptions.py", line 116, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.ChatNotFound: Bad request: chat not found
+12-24 15:16 asyncio      ERROR    Task exception was never retrieved
+future: <Task finished coro=<Dispatcher._process_polling_updates() done, defined at /home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py:249> exception=OperationalError('database is locked')>
+Traceback (most recent call last):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 2683, in execute_sql
+    cursor.execute(sql, params or ())
+sqlite3.OperationalError: database is locked
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 256, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates)):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 119, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 137, in process_update
+    return await self.message_handlers.notify(update.message)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "bot.py", line 73, in start
+    await send_access_request(user)
+  File "bot.py", line 64, in send_access_request
+    user.save()
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 5673, in save
+    rows = self.update(**field_dict).where(self._pk_expr()).execute()
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 1604, in inner
+    return method(self, database, *args, **kwargs)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 1675, in execute
+    return self._execute(database)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 2097, in _execute
+    cursor = database.execute(self)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 2696, in execute
+    return self.execute_sql(sql, params, commit=commit)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 2690, in execute_sql
+    self.commit()
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 2481, in __exit__
+    reraise(new_type, new_type(*exc_args), traceback)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 178, in reraise
+    raise value.with_traceback(tb)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 2683, in execute_sql
+    cursor.execute(sql, params or ())
+peewee.OperationalError: database is locked
+12-24 15:16 asyncio      ERROR    Task exception was never retrieved
+future: <Task finished coro=<Dispatcher._process_polling_updates() done, defined at /home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py:249> exception=MessageToEditNotFound('Bad request: message to edit not found')>
+Traceback (most recent call last):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 256, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates)):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 119, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 171, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "bot.py", line 152, in callback_handler
+    await eval(callback_data['action'])(user, callback_data)
+  File "bot.py", line 134, in set_access
+    reply_markup=keyboard)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/bot.py", line 1490, in edit_message_reply_markup
+    result = await self.request(api.Methods.EDIT_MESSAGE_REPLY_MARKUP, payload)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/base.py", line 109, in request
+    proxy=self.proxy, proxy_auth=self.proxy_auth)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 160, in request
+    return await _check_result(method, response)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 71, in _check_result
+    exceptions.BadRequest.detect(description)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/utils/exceptions.py", line 116, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.MessageToEditNotFound: Bad request: message to edit not found
+12-24 15:16 asyncio      ERROR    Task exception was never retrieved
+future: <Task finished coro=<Dispatcher._process_polling_updates() done, defined at /home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py:249> exception=MessageToEditNotFound('Bad request: message to edit not found')>
+Traceback (most recent call last):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 256, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates)):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 119, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 171, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "bot.py", line 152, in callback_handler
+    await eval(callback_data['action'])(user, callback_data)
+  File "bot.py", line 134, in set_access
+    reply_markup=keyboard)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/bot.py", line 1490, in edit_message_reply_markup
+    result = await self.request(api.Methods.EDIT_MESSAGE_REPLY_MARKUP, payload)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/base.py", line 109, in request
+    proxy=self.proxy, proxy_auth=self.proxy_auth)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 160, in request
+    return await _check_result(method, response)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 71, in _check_result
+    exceptions.BadRequest.detect(description)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/utils/exceptions.py", line 116, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.MessageToEditNotFound: Bad request: message to edit not found
+12-24 15:16 asyncio      ERROR    Task exception was never retrieved
+future: <Task finished coro=<Dispatcher._process_polling_updates() done, defined at /home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py:249> exception=MessageToEditNotFound('Bad request: message to edit not found')>
+Traceback (most recent call last):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 256, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates)):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 119, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 171, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "bot.py", line 152, in callback_handler
+    await eval(callback_data['action'])(user, callback_data)
+  File "bot.py", line 134, in set_access
+    reply_markup=keyboard)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/bot.py", line 1490, in edit_message_reply_markup
+    result = await self.request(api.Methods.EDIT_MESSAGE_REPLY_MARKUP, payload)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/base.py", line 109, in request
+    proxy=self.proxy, proxy_auth=self.proxy_auth)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 160, in request
+    return await _check_result(method, response)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 71, in _check_result
+    exceptions.BadRequest.detect(description)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/utils/exceptions.py", line 116, in detect
+    raise err(cls.text or description)
+aiogram.utils.exceptions.MessageToEditNotFound: Bad request: message to edit not found
+12-24 15:31 asyncio      ERROR    Task exception was never retrieved
+future: <Task finished coro=<Dispatcher._process_polling_updates() done, defined at /home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py:249> exception=AttributeError("type object 'JournalIssue' has no attribute 'pk'")>
+Traceback (most recent call last):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 256, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates)):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 119, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 171, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "bot.py", line 167, in callback_handler
+    await eval(callback_data['action'])(user, callback_data)
+  File "bot.py", line 118, in select_article
+    journal_issue = JournalIssue.get(pk = data['journal_issue_id'])
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 5568, in get
+    sq = sq.filter(**filters)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 6232, in filter
+    query, joins = self.convert_dict_to_node(piece.query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 6199, in convert_dict_to_node
+    model_attr = getattr(curr, key)
+AttributeError: type object 'JournalIssue' has no attribute 'pk'
+12-24 15:42 asyncio      ERROR    Task exception was never retrieved
+future: <Task finished coro=<Dispatcher._process_polling_updates() done, defined at /home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py:249> exception=AttributeError("type object 'JournalIssue' has no attribute 'pk'")>
+Traceback (most recent call last):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 256, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates)):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 119, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 171, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "bot.py", line 168, in callback_handler
+    await eval(callback_data['action'])(user, callback_data)
+  File "bot.py", line 118, in select_article
+    journal_issue = JournalIssue.get(pk = data['journal_issue_id'])
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 5568, in get
+    sq = sq.filter(**filters)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 6232, in filter
+    query, joins = self.convert_dict_to_node(piece.query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 6199, in convert_dict_to_node
+    model_attr = getattr(curr, key)
+AttributeError: type object 'JournalIssue' has no attribute 'pk'
+12-24 15:42 asyncio      ERROR    Task exception was never retrieved
+future: <Task finished coro=<Dispatcher._process_polling_updates() done, defined at /home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py:249> exception=AttributeError("type object 'JournalIssue' has no attribute 'pk'")>
+Traceback (most recent call last):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 256, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates)):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 119, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 171, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "bot.py", line 169, in callback_handler
+    await eval(callback_data['action'])(user, callback_data)
+  File "bot.py", line 119, in select_article
+    journal_issue = JournalIssue.get(pk = data['journal_issue_id'])
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 5568, in get
+    sq = sq.filter(**filters)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 6232, in filter
+    query, joins = self.convert_dict_to_node(piece.query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 6199, in convert_dict_to_node
+    model_attr = getattr(curr, key)
+AttributeError: type object 'JournalIssue' has no attribute 'pk'
+12-24 15:47 asyncio      ERROR    Task exception was never retrieved
+future: <Task finished coro=<Dispatcher._process_polling_updates() done, defined at /home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py:249> exception=AttributeError("type object 'Article' has no attribute 'pk'")>
+Traceback (most recent call last):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 256, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates)):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 119, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 171, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "bot.py", line 168, in callback_handler
+    await eval(callback_data['action'])(user, callback_data)
+  File "bot.py", line 129, in send_article
+    article = Article.get(pk=data['article_id'])
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 5568, in get
+    sq = sq.filter(**filters)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 6232, in filter
+    query, joins = self.convert_dict_to_node(piece.query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 6199, in convert_dict_to_node
+    model_attr = getattr(curr, key)
+AttributeError: type object 'Article' has no attribute 'pk'
+12-24 15:47 asyncio      ERROR    Task exception was never retrieved
+future: <Task finished coro=<Dispatcher._process_polling_updates() done, defined at /home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py:249> exception=AttributeError("type object 'Article' has no attribute 'pk'")>
+Traceback (most recent call last):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 256, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates)):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 119, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 171, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "bot.py", line 168, in callback_handler
+    await eval(callback_data['action'])(user, callback_data)
+  File "bot.py", line 129, in send_article
+    article = Article.get(pk=data['article_id'])
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 5568, in get
+    sq = sq.filter(**filters)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 6232, in filter
+    query, joins = self.convert_dict_to_node(piece.query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 6199, in convert_dict_to_node
+    model_attr = getattr(curr, key)
+AttributeError: type object 'Article' has no attribute 'pk'
+12-24 15:47 asyncio      ERROR    Task exception was never retrieved
+future: <Task finished coro=<Dispatcher._process_polling_updates() done, defined at /home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py:249> exception=AttributeError("type object 'Article' has no attribute 'pk'")>
+Traceback (most recent call last):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 256, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates)):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 119, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 171, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "bot.py", line 168, in callback_handler
+    await eval(callback_data['action'])(user, callback_data)
+  File "bot.py", line 129, in send_article
+    article = Article.get(pk=data['article_id'])
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 5568, in get
+    sq = sq.filter(**filters)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 6232, in filter
+    query, joins = self.convert_dict_to_node(piece.query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/peewee.py", line 6199, in convert_dict_to_node
+    model_attr = getattr(curr, key)
+AttributeError: type object 'Article' has no attribute 'pk'
+12-24 16:11 asyncio      ERROR    Task exception was never retrieved
+future: <Task finished coro=<Dispatcher._process_polling_updates() done, defined at /home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py:249> exception=BadRequest('Bad request: unsupported parse_mode')>
+Traceback (most recent call last):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 256, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates)):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 119, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 171, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "bot.py", line 168, in callback_handler
+    await eval(callback_data['action'])(user, callback_data)
+  File "bot.py", line 125, in select_article
+    await bot.send_message(user.user_id, f'**{journal_issue.title}** \n {journal_issue.annotation}\nВыберите статью:', reply_markup=keyboard, parse_mode='Markup')
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/bot.py", line 203, in send_message
+    result = await self.request(api.Methods.SEND_MESSAGE, payload)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/base.py", line 109, in request
+    proxy=self.proxy, proxy_auth=self.proxy_auth)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 160, in request
+    return await _check_result(method, response)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 71, in _check_result
+    exceptions.BadRequest.detect(description)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/utils/exceptions.py", line 117, in detect
+    raise cls(description)
+aiogram.utils.exceptions.BadRequest: Bad request: unsupported parse_mode
+12-24 16:11 asyncio      ERROR    Task exception was never retrieved
+future: <Task finished coro=<Dispatcher._process_polling_updates() done, defined at /home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py:249> exception=BadRequest('Bad request: unsupported parse_mode')>
+Traceback (most recent call last):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 256, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates)):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 119, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 171, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "bot.py", line 168, in callback_handler
+    await eval(callback_data['action'])(user, callback_data)
+  File "bot.py", line 125, in select_article
+    await bot.send_message(user.user_id, f'**{journal_issue.title}** \n {journal_issue.annotation}\nВыберите статью:', reply_markup=keyboard, parse_mode='Markup')
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/bot.py", line 203, in send_message
+    result = await self.request(api.Methods.SEND_MESSAGE, payload)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/base.py", line 109, in request
+    proxy=self.proxy, proxy_auth=self.proxy_auth)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 160, in request
+    return await _check_result(method, response)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 71, in _check_result
+    exceptions.BadRequest.detect(description)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/utils/exceptions.py", line 117, in detect
+    raise cls(description)
+aiogram.utils.exceptions.BadRequest: Bad request: unsupported parse_mode
+12-24 16:11 asyncio      ERROR    Task exception was never retrieved
+future: <Task finished coro=<Dispatcher._process_polling_updates() done, defined at /home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py:249> exception=BadRequest('Bad request: unsupported parse_mode')>
+Traceback (most recent call last):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 256, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates)):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 119, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 171, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "bot.py", line 168, in callback_handler
+    await eval(callback_data['action'])(user, callback_data)
+  File "bot.py", line 125, in select_article
+    await bot.send_message(user.user_id, f'**{journal_issue.title}** \n {journal_issue.annotation}\nВыберите статью:', reply_markup=keyboard, parse_mode='Markup')
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/bot.py", line 203, in send_message
+    result = await self.request(api.Methods.SEND_MESSAGE, payload)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/base.py", line 109, in request
+    proxy=self.proxy, proxy_auth=self.proxy_auth)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 160, in request
+    return await _check_result(method, response)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 71, in _check_result
+    exceptions.BadRequest.detect(description)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/utils/exceptions.py", line 117, in detect
+    raise cls(description)
+aiogram.utils.exceptions.BadRequest: Bad request: unsupported parse_mode
+12-24 16:11 asyncio      ERROR    Task exception was never retrieved
+future: <Task finished coro=<Dispatcher._process_polling_updates() done, defined at /home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py:249> exception=BadRequest('Bad request: unsupported parse_mode')>
+Traceback (most recent call last):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 256, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates)):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 119, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 171, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "bot.py", line 168, in callback_handler
+    await eval(callback_data['action'])(user, callback_data)
+  File "bot.py", line 125, in select_article
+    await bot.send_message(user.user_id, f'**{journal_issue.title}** \n {journal_issue.annotation}\nВыберите статью:', reply_markup=keyboard, parse_mode='Markup')
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/bot.py", line 203, in send_message
+    result = await self.request(api.Methods.SEND_MESSAGE, payload)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/base.py", line 109, in request
+    proxy=self.proxy, proxy_auth=self.proxy_auth)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 160, in request
+    return await _check_result(method, response)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 71, in _check_result
+    exceptions.BadRequest.detect(description)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/utils/exceptions.py", line 117, in detect
+    raise cls(description)
+aiogram.utils.exceptions.BadRequest: Bad request: unsupported parse_mode
+12-24 16:11 asyncio      ERROR    Task exception was never retrieved
+future: <Task finished coro=<Dispatcher._process_polling_updates() done, defined at /home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py:249> exception=BadRequest('Bad request: unsupported parse_mode')>
+Traceback (most recent call last):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 256, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates)):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 119, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 171, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "bot.py", line 168, in callback_handler
+    await eval(callback_data['action'])(user, callback_data)
+  File "bot.py", line 125, in select_article
+    await bot.send_message(user.user_id, f'**{journal_issue.title}** \n {journal_issue.annotation}\nВыберите статью:', reply_markup=keyboard, parse_mode='Markup')
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/bot.py", line 203, in send_message
+    result = await self.request(api.Methods.SEND_MESSAGE, payload)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/base.py", line 109, in request
+    proxy=self.proxy, proxy_auth=self.proxy_auth)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 160, in request
+    return await _check_result(method, response)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 71, in _check_result
+    exceptions.BadRequest.detect(description)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/utils/exceptions.py", line 117, in detect
+    raise cls(description)
+aiogram.utils.exceptions.BadRequest: Bad request: unsupported parse_mode
+12-24 16:11 asyncio      ERROR    Task exception was never retrieved
+future: <Task finished coro=<Dispatcher._process_polling_updates() done, defined at /home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py:249> exception=BadRequest('Bad request: unsupported parse_mode')>
+Traceback (most recent call last):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 256, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates)):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 119, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 171, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "bot.py", line 168, in callback_handler
+    await eval(callback_data['action'])(user, callback_data)
+  File "bot.py", line 125, in select_article
+    await bot.send_message(user.user_id, f'**{journal_issue.title}** \n {journal_issue.annotation}\nВыберите статью:', reply_markup=keyboard, parse_mode='Markup')
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/bot.py", line 203, in send_message
+    result = await self.request(api.Methods.SEND_MESSAGE, payload)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/base.py", line 109, in request
+    proxy=self.proxy, proxy_auth=self.proxy_auth)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 160, in request
+    return await _check_result(method, response)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 71, in _check_result
+    exceptions.BadRequest.detect(description)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/utils/exceptions.py", line 117, in detect
+    raise cls(description)
+aiogram.utils.exceptions.BadRequest: Bad request: unsupported parse_mode
+12-24 16:12 asyncio      ERROR    Task exception was never retrieved
+future: <Task finished coro=<Dispatcher._process_polling_updates() done, defined at /home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py:249> exception=BadRequest('Bad request: unsupported parse_mode')>
+Traceback (most recent call last):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 256, in _process_polling_updates
+    for responses in itertools.chain.from_iterable(await self.process_updates(updates)):
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 119, in process_updates
+    return await asyncio.gather(*tasks)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/__init__.py", line 171, in process_update
+    return await self.callback_query_handlers.notify(update.callback_query)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/dispatcher/handler.py", line 74, in notify
+    response = await handler(*args)
+  File "bot.py", line 168, in callback_handler
+    await eval(callback_data['action'])(user, callback_data)
+  File "bot.py", line 125, in select_article
+    await bot.send_message(user.user_id, f'**{journal_issue.title}** \n {journal_issue.annotation}\nВыберите статью:', reply_markup=keyboard, parse_mode='Markup')
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/bot.py", line 203, in send_message
+    result = await self.request(api.Methods.SEND_MESSAGE, payload)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/base.py", line 109, in request
+    proxy=self.proxy, proxy_auth=self.proxy_auth)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 160, in request
+    return await _check_result(method, response)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/bot/api.py", line 71, in _check_result
+    exceptions.BadRequest.detect(description)
+  File "/home/alexkott/Documents/YouDo/jw_bot/venv/lib/python3.7/site-packages/aiogram/utils/exceptions.py", line 117, in detect
+    raise cls(description)
+aiogram.utils.exceptions.BadRequest: Bad request: unsupported parse_mode
+12-24 16:33 asyncio      ERROR    Task exception was never retrieved
+future: <Task finished coro=<JWWatcher.main() done, defined at /home/alexkott/Documents/YouDo/jw_bot/jw_watcher.py:13> exception=AttributeError("'NoneType' object has no attribute 'group'")>
+Traceback (most recent call last):
+  File "/home/alexkott/Documents/YouDo/jw_bot/jw_watcher.py", line 22, in main
+    articles = await parse_journal_issue(journal=journal, year=year)
+  File "/home/alexkott/Documents/YouDo/jw_bot/common_functions.py", line 204, in parse_journal_issue
+    await check_journal_issue_availability(journal, item.h3.a['href'])
+  File "/home/alexkott/Documents/YouDo/jw_bot/common_functions.py", line 145, in check_journal_issue_availability
+    number, year, title = parse_context_title(context_title)
+  File "/home/alexkott/Documents/YouDo/jw_bot/common_functions.py", line 58, in parse_context_title
+    return match.group('number'), match.group('year'), match.group('title')
+AttributeError: 'NoneType' object has no attribute 'group'
