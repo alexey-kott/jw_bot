@@ -55,11 +55,11 @@ async def send_access_request(user):
     keyboard = InlineKeyboardMarkup()
     accept_access_btn = InlineKeyboardButton(text='Принять',
                                              callback_data=json.dumps({'action': 'set_access',
-                                                                       'user': user.user_id,
+                                                                       'user_id': user.user_id,
                                                                        'mode': True}))
     cancel_access_btn = InlineKeyboardButton(text='Отказать',
                                              callback_data=json.dumps({'action': 'set_access',
-                                                                       'user': user.user_id,
+                                                                       'user_id': user.user_id,
                                                                        'mode': False}))
     keyboard.row(accept_access_btn, cancel_access_btn)
     msg_info = await bot.send_message(ACCESS_CONTROL_CHANNEL_ID,
@@ -142,32 +142,33 @@ async def send_article(user: User, data: dict):
 
 
 async def set_access(user: User, data: dict):
-    user.access = data['mode']
+    bot_user = User.get(User.user_id == data['user_id'])
+    bot_user.access = data['mode']
 
     keyboard = InlineKeyboardMarkup()
     callback_data = {
         'action': 'set_access',
-        'user': user.user_id,
-        'mode': not user.access
+        'user_id': bot_user.user_id,
+        'mode': not bot_user.access
     }
-    if user.access:
+    if bot_user.access:
         btn_text = 'Доступ выдан. Нажмите чтобы изменить'
         msg_text = 'Вам выдан доступ. Теперь Вы можете пользоваться контентом бота.'
     else:
         btn_text = 'В доступе отказано. Нажмите чтобы изменить'
         msg_text = 'Вам отказано в доступе.'
     keyboard.insert(InlineKeyboardButton(text=btn_text, callback_data=json.dumps(callback_data)))
-    await bot.edit_message_reply_markup(ACCESS_CONTROL_CHANNEL_ID, user.access_msg_id,
+    await bot.edit_message_reply_markup(ACCESS_CONTROL_CHANNEL_ID, bot_user.access_msg_id,
                                         reply_markup=keyboard)
 
-    if user.access:
-        user.state = 'default'
+    if bot_user.access:
+        bot_user.state = 'default'
         keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
         keyboard.add(KeyboardButton('Главное меню'))
     else:
         keyboard = ReplyKeyboardRemove()
-    user.save()
-    await bot.send_message(user.user_id, msg_text, reply_markup=keyboard)
+    bot_user.save()
+    await bot.send_message(bot_user.user_id, msg_text, reply_markup=keyboard)
 
 
 @dp.callback_query_handler()
