@@ -1,4 +1,5 @@
 import asyncio
+import locale
 import logging
 import re
 from logging import Logger
@@ -17,6 +18,8 @@ logging.basicConfig(level=logging.ERROR,
                     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                     datefmt='%m-%d %H:%M',
                     filename='./logs/log')
+
+locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
 
 MAIN_URL = "https://www.jw.org"
 
@@ -71,7 +74,9 @@ class JWWatcher(Thread):
         return Journal.select()
 
     async def check_journal_issue_availability(self, journal: Journal, link: str):
-        page_source = await get_page_source(f"{MAIN_URL}{link}")
+        issue_link = f"{MAIN_URL}{link}"
+        self.logger.info(f"Check journal issue: {issue_link}")
+        page_source = await get_page_source(issue_link)
         soup = BeautifulSoup(page_source, 'lxml')
 
         main_frame = soup.find('div', {'id': 'article'})
@@ -81,13 +86,15 @@ class JWWatcher(Thread):
 
         section1 = main_frame.find('div',
                                    {'id': 'section1'})  # div with id=section1 is annotation with header
-        header = section1.find('h2', {'id': 'p2'})
-        synopsis = section1.find('p', {'id': 'p3'})
 
-        if header is not None:
+        header = ''
+        annotation = ''
+        try:
+            header = section1.find('h2', {'id': 'p2'})
+            synopsis = section1.find('p', {'id': 'p3'})
             annotation = f"{header.text}\n\n{synopsis.text}"
-        else:
-            annotation = synopsis.text
+        except AttributeError as e:
+            self.logger.exception(e)
 
         journal_issue = JournalIssue.get_or_none(JournalIssue.journal == journal, JournalIssue.year == year,
                                                  JournalIssue.number == number)
@@ -107,9 +114,20 @@ class JWWatcher(Thread):
 
     def parse_context_title(self, title: str) -> Tuple[str, str, str]:
         [s.extract() for s in title('span')]
-        match = re.search("(?P<number>(?<=№\s)\d+)\s(?P<year>\d{4})\s+\|\s(?P<title>.*)", title.text)
+        match = re.search(r"(?P<number>(?<=№\s)\d+)\s(?P<year>\d{4})\s+\|\s(?P<title>.*)", title.text)
 
-        return match.group('number'), match.group('year'), match.group('title')
+        if match is None:
+            match = re.search(r"(?P<month>\S*)\s(?P<year>\d{4})\s+\|\s(?P<title>.*)", title.text)
+            month_name = match.group('month')
+            dt = datetime.strptime(month_name, '%B')
+            number = dt.month
+        else:
+            number = match.group('number')
+
+        year = match.group('year')
+        title = match.group('title')
+
+        return number, year, title
 
     def run(self):
         self.loop.create_task(self.main())
