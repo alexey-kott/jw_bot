@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import re
 from datetime import datetime
 from typing import Union, Dict, Tuple
@@ -12,7 +13,7 @@ from aiogram.types.inline_keyboard import InlineKeyboardButton, InlineKeyboardMa
 from aiogram.types.reply_keyboard import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from attr import attrs
 
-from common_functions import init_routing, parse_journal_issue
+from common_functions import init_routing
 from config import BOT_TOKEN, ACCESS_CONTROL_CHANNEL_ID
 from models import User, Routing, Article, Journal, JournalIssue
 import string_resources as str_res
@@ -21,6 +22,11 @@ from jw_watcher import JWWatcher
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(bot)
 
+
+logging.basicConfig(level=logging.ERROR,
+                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                    datefmt='%m-%d %H:%M',
+                    filename='./logs/log')
 
 @attrs
 class CallbackData:
@@ -60,6 +66,8 @@ async def send_access_request(user):
                                       f"{user.first_name} {user.last_name} (@{user.username})",
                                       reply_markup=keyboard)
 
+    if user.access_msg_id is not None:
+        await bot.delete_message(ACCESS_CONTROL_CHANNEL_ID, user.access_msg_id)
     user.access_msg_id = msg_info['message_id']
     user.save()
 
@@ -67,9 +75,8 @@ async def send_access_request(user):
 @dp.message_handler(commands=['start'])
 async def start(message: Message):
     user = User.cog(message)
-    await message.reply(
-        f"Чтобы получить доступ к материалам Ваше участие должно быть одобрено администратором."
-        f"Запрос на доступ был отправлен. Бот известит Вас как только администратор даст согласие.")
+    await message.reply(f"Чтобы получить доступ к материалам Ваше участие должно быть одобрено администратором. "
+                        f"Запрос на доступ был отправлен. Бот известит Вас как только администратор даст согласие.")
     await send_access_request(user)
 
 
@@ -77,33 +84,34 @@ async def select_journal(user: User, message: Message):
     callback_data = {}
     keyboard = InlineKeyboardMarkup()
     for journal in Journal.select():
+        if len(journal.issues) == 0:
+            continue
         callback_data['action'] = 'select_journal_year'
         callback_data['journal_id'] = journal.id  # Сторожевая башня
-        keyboard.add(
-            InlineKeyboardButton(text=journal.title, callback_data=json.dumps(callback_data)))
+        keyboard.add(InlineKeyboardButton(text=journal.title, callback_data=json.dumps(callback_data)))
     await bot.send_message(user.user_id, 'Какой журнал Вас интересует?', reply_markup=keyboard)
 
 
 async def select_journal_year(user: User, data: dict):
     keyboard = InlineKeyboardMarkup(row_width=2)
     journal = Journal.get(Journal.id == data['journal_id'])
-    for journal_issue in JournalIssue.select(JournalIssue.year).where(
-            JournalIssue.journal == journal).distinct().order_by(JournalIssue.year.desc()):
+    for journal_issue in (JournalIssue.select(JournalIssue.year)
+                                      .where(JournalIssue.journal == journal).distinct()
+                                      .order_by(JournalIssue.year.desc())):
         callback_data = {
-            'action': 'select_issue',
+            'action': 'select_journal_issue',
             'journal_id': data['journal_id'],
-            'year': journal_issue.year,
         }
-        keyboard.add(
-            InlineKeyboardButton(text=journal_issue.year, callback_data=json.dumps(callback_data)))
+        keyboard.add(InlineKeyboardButton(text=journal_issue.year, callback_data=json.dumps(callback_data)))
     await bot.send_message(user.user_id, 'Выберите год:', reply_markup=keyboard)
 
 
-async def select_issue(user: User, data: dict):
+async def select_journal_issue(user: User, data: dict):
     keyboard = InlineKeyboardMarkup(row_width=2)
     journal = Journal.get(Journal.id == data['journal_id'])
-    for journal_issue in JournalIssue.select().where(JournalIssue.journal == journal).order_by(
-            JournalIssue.number):
+    for journal_issue in JournalIssue.select().where(JournalIssue.journal == journal).order_by(JournalIssue.number):
+        if len(journal_issue.articles) == 0:
+            continue
         callback_data = {
             'action': 'select_article',
             'journal_issue_id': journal_issue.id
@@ -121,8 +129,7 @@ async def select_article(user: User, data: dict):
             'action': 'send_article',
             'article_id': article.id
         }
-        keyboard.add(
-            InlineKeyboardButton(text=article.title, callback_data=json.dumps(callback_data)))
+        keyboard.add(InlineKeyboardButton(text=article.title, callback_data=json.dumps(callback_data)))
     await bot.send_message(user.user_id,
                            f'***{journal_issue.title}*** \n\n {journal_issue.annotation}\n\n'
                            f'Выберите статью:',
@@ -191,7 +198,10 @@ async def text_handler(message: Message):
 
 
 if __name__ == '__main__':
+    logger = logging.getLogger('jw_bot')
+    logger.setLevel(logging.INFO)
+
     event_loop = asyncio.get_event_loop()
-    jw_watcher = JWWatcher(loop=event_loop)
+    jw_watcher = JWWatcher(watcher_loop=event_loop, watcher_logger=logger)
     jw_watcher.start()
     executor.start_polling(dp)

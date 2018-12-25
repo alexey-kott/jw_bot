@@ -1,7 +1,8 @@
 from typing import Union
 
 from aiogram.types import Message, CallbackQuery
-from peewee import Model, SqliteDatabase, TextField, IntegerField, CompositeKey, CharField, ForeignKeyField, BooleanField
+from peewee import Model, SqliteDatabase, TextField, IntegerField, CompositeKey, CharField, ForeignKeyField, \
+    BooleanField
 
 db = SqliteDatabase('db.sqlite3')
 
@@ -28,9 +29,9 @@ class User(BaseModel):
             except Exception as e:
                 try:
                     obj = cls.create(user_id=data.from_user.id,
-                                      username=data.from_user.username,
-                                      first_name=data.from_user.first_name,
-                                      last_name=data.from_user.last_name)
+                                     username=data.from_user.username,
+                                     first_name=data.from_user.first_name,
+                                     last_name=data.from_user.last_name)
                 except Exception as e:
                     print(e)
 
@@ -65,7 +66,7 @@ class Article(BaseModel):
     telegraph_url = TextField()
     journal_issue = ForeignKeyField(JournalIssue, backref='articles')
     content_hash = TextField()  # хэш от суммы компонентов статьи (иллюстрация, заголовок, текст),
-                        #  если он изменился -- заново экспортируем статью в telegraph
+    #  если он изменился -- заново экспортируем статью в telegraph
 
 
 class Routing(BaseModel):

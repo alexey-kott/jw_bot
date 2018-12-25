@@ -51,13 +51,6 @@ async def get_page_source(url, params=None):
             return await response.text()
 
 
-def parse_context_title(title: str) -> Tuple[str, str, str]:
-    [s.extract() for s in title('span')]
-    match = re.search("(?P<number>(?<=№\s)\d+)\s(?P<year>\d{4})\s+\|\s(?P<title>.*)", title.text)
-
-    return match.group('number'), match.group('year'), match.group('title')
-
-
 def prepare_items(items: List[Tag]) -> str:
     AVAILABLE_TAGS = ['h1', 'h2', 'h3', 'h4', 'hr', 'img', 'p', 'ul', 'ol']
 
@@ -85,7 +78,7 @@ def calc_article_hash(items: List[Tag]) -> str:
     return hash_object.hexdigest()
 
 
-async def export_article_to_telegraph(journal_issue: JournalIssue, link: str) -> Article:
+async def export_article_to_telegraph(journal_issue: JournalIssue, link: str, logger: logging.Logger) -> Article:
     items = []
     page_source = await get_page_source(f"{MAIN_URL}{link}")
 
@@ -125,91 +118,20 @@ async def export_article_to_telegraph(journal_issue: JournalIssue, link: str) ->
                                      journal_issue=journal_issue,
                                      content_hash=current_article_hash)
         new_article.save()
-        print('NEW ARTICLE: ', new_article.telegraph_url)
+        logger.info(f"New article. Article id: {new_article.id}, Telegraph URL: {new_article.telegraph_url}")
     elif article.content_hash != current_article_hash:
-        print('Article ', article, ' changed')
         telegraph_raw_response = telegraph.edit_page(path=article.telegraph_url, title=header.text,
                                                      html_content=prepared_telegraph_page)
         article.content_hash = current_article_hash
         article.save()
-        print('EDITED ARTICLE: ', article)
+        logger.info(f"Edited article. Article id: {article.id}, Telegraph URL: {article.telegraph_url}")
         print(telegraph_raw_response)
 
-
-async def check_journal_issue_availability(journal: Journal, link: str) -> int:
-    page_source = await get_page_source(f"{MAIN_URL}{link}")
-    soup = BeautifulSoup(page_source, 'lxml')
-
-    main_frame = soup.find('div', {'id': 'article'})
-
-    context_title = main_frame.find('h1')
-    number, year, title = parse_context_title(context_title)
-
-    section1 = main_frame.find('div',
-                               {'id': 'section1'})  # div with id=section1 is annotation with header
-    header = section1.find('h2', {'id': 'p2'})
-    synopsis = section1.find('p', {'id': 'p3'})
-
-    if header is not None:
-        annotation = f"{header.text}\n\n{synopsis.text}"
-    else:
-        annotation = synopsis.text
-
-    journal_issue = JournalIssue.get_or_none(JournalIssue.journal == journal,
-                                             JournalIssue.year == year,
-                                             JournalIssue.number == number)
-
-    if not journal_issue:
-        journal_issue = JournalIssue.create(journal=journal,
-                                            year=year,
-                                            number=number,
-                                            title=title,
-                                            annotation=annotation,
-                                            link=link)
-
-    #
-    article_items = main_frame.find_all('div', {'class': 'PublicationArticle'})
-
-    for item in article_items:
-        article_link = item.find('a')
-        try:
-            await export_article_to_telegraph(journal_issue, article_link['href'])
-        except Exception as e:
-            print(e)
-            logger.exception(f"Article wasn't parsed: {MAIN_URL}{article_link['href']}")
+    return article
 
 
-async def get_journal_list() -> ModelSelect:
-    '''Получаем список журналов с их обозначениями, проверяем не появилось ли чего-то нового (скорее
-    всего нет, но функция в первую очередь необходима при первичном запуске приложения)
-    '''
-    page_source = await get_page_source(f"{MAIN_URL}/ru/публикации/журналы/")
-    soup = BeautifulSoup(page_source, 'lxml')
-
-    journal_filter = soup.find('select', {'id': 'pubFilter'})
-    for item in journal_filter.find_all('option'):
-        if item['value']:
-            if not Journal.get_or_none(Journal.symbol == item['value']):
-                journal = Journal.create(symbol=item['value'],
-                                         title=item.text,
-                                         priority=int(item['data-priority']))
-                journal.save()
-
-    return Journal.select()
 
 
-async def parse_journal_issue(journal: Journal, year: int) -> List[Tuple[str, str]]:
-    params = {
-        'contentLanguageFilter': 'ru',
-        'pubFilter': journal.symbol,
-        'yearFilter': year
-    }
-    page_source = await get_page_source(f"{MAIN_URL}/ru/публикации/журналы/", params=params)
-    soup = BeautifulSoup(page_source, 'lxml')
 
-    articles = []
-    for item in soup.find_all(class_='publicationDesc'):
-        print(item.text)
-        await check_journal_issue_availability(journal, item.h3.a['href'])
 
-    return articles
+
