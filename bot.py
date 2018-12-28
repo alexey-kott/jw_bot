@@ -18,6 +18,7 @@ from config import BOT_TOKEN, ACCESS_CONTROL_CHANNEL_ID
 from models import User, Routing, Article, Journal, JournalIssue
 import string_resources as str_res
 from jw_watcher import JWWatcher
+from string_resources import STRESS
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(bot)
@@ -62,9 +63,15 @@ async def send_access_request(user):
                                                                        'user_id': user.user_id,
                                                                        'mode': False}))
     keyboard.row(accept_access_btn, cancel_access_btn)
-    msg_info = await bot.send_message(ACCESS_CONTROL_CHANNEL_ID,
-                                      f"{user.first_name} {user.last_name} (@{user.username})",
-                                      reply_markup=keyboard)
+
+    access_request_msg = f'''
+    ***User ID:*** {user.user_id}
+    ***First name:*** {user.first_name}
+    ***Last name:*** {user.last_name if user.last_name else '—'}
+    ***Username:*** {'@'+user.username if user.username else '—'}
+    '''
+    msg_info = await bot.send_message(ACCESS_CONTROL_CHANNEL_ID, access_request_msg,
+                                      reply_markup=keyboard, parse_mode='Markdown')
 
     if user.access_msg_id is not None:
         await bot.delete_message(ACCESS_CONTROL_CHANNEL_ID, user.access_msg_id)
@@ -75,8 +82,7 @@ async def send_access_request(user):
 @dp.message_handler(commands=['start'])
 async def start(message: Message):
     user = User.cog(message)
-    await message.reply(f"Чтобы получить доступ к материалам Ваше участие должно быть одобрено администратором. "
-                        f"Запрос на доступ был отправлен. Бот известит Вас как только администратор даст согласие.")
+    await message.reply(STRESS['start_message'])
     await send_access_request(user)
 
 
@@ -152,11 +158,11 @@ async def set_access(user: User, data: dict):
         'mode': not bot_user.access
     }
     if bot_user.access:
-        btn_text = 'Доступ выдан. Нажмите чтобы изменить'
-        msg_text = 'Вам выдан доступ. Теперь Вы можете пользоваться контентом бота.'
+        btn_text = STRESS['access_granted_btn']
+        msg_text = STRESS['access_granted_msg']
     else:
-        btn_text = 'В доступе отказано. Нажмите чтобы изменить'
-        msg_text = 'Вам отказано в доступе.'
+        btn_text = STRESS['access_denied_btn']
+        msg_text = STRESS['access_denied_msg']
     keyboard.insert(InlineKeyboardButton(text=btn_text, callback_data=json.dumps(callback_data)))
     await bot.edit_message_reply_markup(ACCESS_CONTROL_CHANNEL_ID, bot_user.access_msg_id,
                                         reply_markup=keyboard)
