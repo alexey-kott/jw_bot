@@ -6,7 +6,7 @@ from logging import Logger
 from asyncio import AbstractEventLoop
 from datetime import datetime
 from threading import Thread
-from typing import Tuple, List
+from typing import Tuple
 
 from bs4 import BeautifulSoup
 from peewee import ModelSelect
@@ -43,7 +43,7 @@ class JWWatcher(Thread):
                 except Exception as e:
                     self.logger.exception(e)
 
-    async def parse_journal_issue(self, journal: Journal, year: int) -> List[Tuple[str, str]]:
+    async def parse_journal_issue(self, journal: Journal, year: int):
         params = {
             'contentLanguageFilter': 'ru',
             'pubFilter': journal.symbol,
@@ -87,13 +87,12 @@ class JWWatcher(Thread):
         section1 = main_frame.find('div',
                                    {'id': 'section1'})  # div with id=section1 is annotation with header
 
-        header = ''
-        annotation = ''
         try:
             header = section1.find('h2', {'id': 'p2'})
             synopsis = section1.find('p', {'id': 'p3'})
             annotation = f"{header.text}\n\n{synopsis.text}"
         except AttributeError as e:
+            annotation = ''
             self.logger.exception(e)
 
         journal_issue = JournalIssue.get_or_none(JournalIssue.journal == journal, JournalIssue.year == year,

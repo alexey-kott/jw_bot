@@ -1,9 +1,6 @@
 import asyncio
 import json
 import logging
-import re
-from datetime import datetime
-from typing import Union, Dict, Tuple
 
 from aiogram import Bot
 from aiogram.types import Message, CallbackQuery
@@ -11,12 +8,10 @@ from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
 from aiogram.types.inline_keyboard import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.types.reply_keyboard import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
-from attr import attrs
 
 from common_functions import init_routing
 from config import BOT_TOKEN, ACCESS_CONTROL_CHANNEL_ID
 from models import User, Routing, Article, Journal, JournalIssue
-import string_resources as str_res
 from jw_watcher import JWWatcher
 from string_resources import STRESS
 
@@ -29,10 +24,10 @@ logging.basicConfig(level=logging.ERROR,
                     datefmt='%m-%d %H:%M',
                     filename='./logs/log')
 
-@attrs
-class CallbackData:
-    action: str
-    params: Dict[str, Union[int, str]]
+
+@dp.message_handler(commands=['ping'])
+async def ping(message: Message):
+    await message.reply("I'm alive!")
 
 
 @dp.message_handler(commands=['init'])
@@ -43,6 +38,7 @@ async def init(message: Message):
     Journal.create_table(fail_silently=True)
     JournalIssue.create_table(fail_silently=True)
     init_routing()
+    await message.reply('Init successful')
 
 
 @dp.message_handler(commands=['reset'])

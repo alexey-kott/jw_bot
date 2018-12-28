@@ -55,7 +55,7 @@ def prepare_items(items: List[Tag]) -> str:
     AVAILABLE_TAGS = ['h1', 'h2', 'h3', 'h4', 'hr', 'img', 'p', 'ul', 'ol']
 
     for item in items:
-        # print(item)
+        print(item)
 
         for match in item.find_all('span'):
             match.unwrap()
@@ -95,8 +95,11 @@ async def export_article_to_telegraph(journal_issue: JournalIssue, link: str, lo
         items.append(banner_img)
 
     header = soup.find('div', {'id': 'article'}).find('header').find('h1')
-    content = soup.find('div', {'id': 'article'}).find('div', {'class': 'docSubContent'}).find_all(
-        'p')
+
+    # ['a', 'aside', 'b', 'blockquote', 'br', 'code', 'em', 'figcaption', 'figure', 'h3', 'h4', 'hr',
+    # 'i', 'iframe', 'img', 'li', 'ol', 'p', 'pre', 's', 'strong', 'u', 'ul', 'video']
+    AVAILABLE_TAGS = ['h1', 'h2', 'h3', 'h4', 'hr', 'img', 'p', 'ul', 'ol', 'a']
+    content = soup.find('div', {'id': 'article'}).find('div', {'class': 'docSubContent'}).find_all(AVAILABLE_TAGS)
 
     telegraph = Telegraph(TELEGRAPH_USER_TOKEN)
 
