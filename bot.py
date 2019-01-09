@@ -15,7 +15,7 @@ from models import User, Routing, Article, Journal, JournalIssue
 from jw_watcher import JWWatcher
 from string_resources import STRESS
 
-bot = Bot(token=BOT_TOKEN)
+bot = Bot(token=BOT_TOKEN, proxy="socks5://163.172.152.192:1080")
 dp = Dispatcher(bot)
 
 

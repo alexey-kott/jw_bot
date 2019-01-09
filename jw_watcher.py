@@ -36,6 +36,7 @@ class JWWatcher(Thread):
         journal_list = await self.get_journal_list()
 
         for year in range(current_year, 2000, -1):
+            print(year)
             for journal in journal_list:
                 self.logger.info(f'Year: {year}; journal: {journal.title}')
                 try:
@@ -107,6 +108,7 @@ class JWWatcher(Thread):
             article_link = item.find('a')
             try:
                 telegraph_response = await export_article_to_telegraph(journal_issue, article_link['href'], self.logger)
+                print(telegraph_response)
 
 
             except Exception as e:

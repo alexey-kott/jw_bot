@@ -4,6 +4,7 @@ import re
 from hashlib import sha1
 
 import sqlite3
+from sqlite3 import IntegrityError
 from typing import Tuple, List
 
 from bs4 import BeautifulSoup, Tag
@@ -12,6 +13,7 @@ from aiohttp import ClientSession
 from peewee import ModelSelect
 from telegraph import Telegraph
 from telegraph.utils import html_to_nodes
+from telegraph.exceptions import NotAllowedTag
 
 from config import TELEGRAPH_USER_TOKEN
 from models import Article, JournalIssue, Journal
@@ -71,19 +73,19 @@ def prepare_items(items: List[Tag]) -> str:
     AVAILABLE_TAGS = ['h1', 'h2', 'h3', 'h4', 'hr', 'img', 'p', 'ul', 'ol']
 
     for item in items:
-        # print(item.name)
-
         if item.name == 'a':
             # print(item['href'])
             item['href'] = try_replace_link(item['href'])
 
         for match in item.find_all('span'):
             match.unwrap()
-        for tag in item.find_all(['h1', 'h2', 'span']):
+        for tag in item.find_all('div'):
             if tag.name == 'h1':
                 tag.name = 'h3'
             if tag.name == 'h2':
                 tag.name = 'h4'
+            if tag.name not in AVAILABLE_TAGS:
+                tag.decompose()
         #
         #     if tag.span is not None:
         #         tag.span.decompose()
@@ -130,17 +132,28 @@ async def export_article_to_telegraph(journal_issue: JournalIssue, link: str, lo
     prepared_telegraph_page = ''.join(html_content)
 
     if not article:
-        telegraph_response = telegraph.create_page(title=header.text,
-                                                   html_content=prepared_telegraph_page)
-        new_article = Article.create(title=telegraph_response['title'],
-                                     url=link,
-                                     telegraph_url=telegraph_response['url'],
-                                     journal_issue=journal_issue,
-                                     content_hash=current_article_hash)
-        new_article.save()
-        logger.info(f"New article. Article id: {new_article.id}, Telegraph URL: {new_article.telegraph_url}")
+        try:
+            telegraph_response = telegraph.create_page(title=header.text,
+                                                       html_content=prepared_telegraph_page)
 
-        return telegraph_response
+            new_article = Article.create(title=telegraph_response['title'],
+                                         url=link,
+                                         telegraph_url=telegraph_response['url'],
+                                         journal_issue=journal_issue,
+                                         content_hash=current_article_hash)
+            new_article.save()
+            logger.info(f"New article. Article id: {new_article.id}, Telegraph URL: {new_article.telegraph_url}")
+
+            return telegraph_response
+
+        except NotAllowedTag as e:
+            with open('error_content.html', 'w') as file:
+                    file.write(prepared_telegraph_page)
+
+        except IntegrityError as e:
+            print('INTEGRITY ERROR')
+            print(link)
+
     elif article.content_hash != current_article_hash:
         telegraph_raw_response = telegraph.edit_page(path=article.telegraph_url, title=header.text,
                                                      html_content=prepared_telegraph_page)
