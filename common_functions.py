@@ -51,11 +51,31 @@ async def get_page_source(url, params=None):
             return await response.text()
 
 
+def try_replace_link(link: str) -> str:
+    # print(link)
+    # print('------------------------------')
+    article = Article.get_or_none(Article.url == link)
+
+    if article:
+        print(article.telegraph_url)
+        return article.telegraph_url
+    else:
+        return link
+
+    # print('==============================')
+    # print('\n\n')
+    # print(type(select))
+
+
 def prepare_items(items: List[Tag]) -> str:
     AVAILABLE_TAGS = ['h1', 'h2', 'h3', 'h4', 'hr', 'img', 'p', 'ul', 'ol']
 
     for item in items:
-        print(item)
+        # print(item.name)
+
+        if item.name == 'a':
+            # print(item['href'])
+            item['href'] = try_replace_link(item['href'])
 
         for match in item.find_all('span'):
             match.unwrap()
@@ -87,18 +107,15 @@ async def export_article_to_telegraph(journal_issue: JournalIssue, link: str, lo
     if banner is not None:
         banner_img = banner.find('img')
         banner_img['src'] = banner_img['src'].replace('_xs.', '_lg.')
-        banner_img_src = banner_img['src'].replace('_xs.',
-                                                   '_lg.')  # костыль, связанный с тем, что сайт
-        # не может определить
-        # разрешение экрана юзера и по дефолту отдаёт самые
-        # маленькие изображения
+        banner_img_src = banner_img['src'].replace('_xs.', '_lg.')  # костыль, связанный с тем, что сайт
+        # не может определить  разрешение экрана юзера и по дефолту отдаёт самые маленькие изображения
         items.append(banner_img)
 
     header = soup.find('div', {'id': 'article'}).find('header').find('h1')
 
     # ['a', 'aside', 'b', 'blockquote', 'br', 'code', 'em', 'figcaption', 'figure', 'h3', 'h4', 'hr',
     # 'i', 'iframe', 'img', 'li', 'ol', 'p', 'pre', 's', 'strong', 'u', 'ul', 'video']
-    AVAILABLE_TAGS = ['h1', 'h2', 'h3', 'h4', 'hr', 'img', 'p', 'ul', 'ol', 'a']
+    AVAILABLE_TAGS = ['h1', 'h3', 'h4', 'hr', 'img', 'p', 'ul', 'ol', 'a']
     content = soup.find('div', {'id': 'article'}).find('div', {'class': 'docSubContent'}).find_all(AVAILABLE_TAGS)
 
     telegraph = Telegraph(TELEGRAPH_USER_TOKEN)
@@ -122,6 +139,8 @@ async def export_article_to_telegraph(journal_issue: JournalIssue, link: str, lo
                                      content_hash=current_article_hash)
         new_article.save()
         logger.info(f"New article. Article id: {new_article.id}, Telegraph URL: {new_article.telegraph_url}")
+
+        return telegraph_response
     elif article.content_hash != current_article_hash:
         telegraph_raw_response = telegraph.edit_page(path=article.telegraph_url, title=header.text,
                                                      html_content=prepared_telegraph_page)
@@ -130,7 +149,7 @@ async def export_article_to_telegraph(journal_issue: JournalIssue, link: str, lo
         logger.info(f"Edited article. Article id: {article.id}, Telegraph URL: {article.telegraph_url}")
         print(telegraph_raw_response)
 
-    return article
+        return telegraph_raw_response
 
 
 

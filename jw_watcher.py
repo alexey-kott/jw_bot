@@ -106,7 +106,9 @@ class JWWatcher(Thread):
         for item in article_items:
             article_link = item.find('a')
             try:
-                await export_article_to_telegraph(journal_issue, article_link['href'], self.logger)
+                telegraph_response = await export_article_to_telegraph(journal_issue, article_link['href'], self.logger)
+
+
             except Exception as e:
                 print(e)
                 self.logger.exception(f"Article wasn't parsed: {MAIN_URL}{article_link['href']}")

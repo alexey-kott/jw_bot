@@ -2,9 +2,13 @@ from typing import Union
 
 from aiogram.types import Message, CallbackQuery
 from peewee import Model, SqliteDatabase, TextField, IntegerField, CompositeKey, CharField, ForeignKeyField, \
-    BooleanField
+    BooleanField, PostgresqlDatabase
+from telegraph import Telegraph
+
+from config import TELEGRAPH_USER_TOKEN
 
 db = SqliteDatabase('db.sqlite3')
+# db = PostgresqlDatabase()
 
 
 class BaseModel(Model):
@@ -28,14 +32,12 @@ class User(BaseModel):
                 return cls.get(user_id=data.from_user.id)
             except Exception as e:
                 try:
-                    obj = cls.create(user_id=data.from_user.id,
-                                     username=data.from_user.username,
-                                     first_name=data.from_user.first_name,
-                                     last_name=data.from_user.last_name)
+                    return cls.create(id=data.from_user.id,
+                                      username=data.from_user.username,
+                                      first_name=data.from_user.first_name,
+                                      last_name=data.from_user.last_name)
                 except Exception as e:
                     print(e)
-
-                return obj
         else:
             raise NotImplementedError
 
@@ -66,7 +68,30 @@ class Article(BaseModel):
     telegraph_url = TextField()
     journal_issue = ForeignKeyField(JournalIssue, backref='articles')
     content_hash = TextField()  # хэш от суммы компонентов статьи (иллюстрация, заголовок, текст),
+
     #  если он изменился -- заново экспортируем статью в telegraph
+
+    def is_changed(self):
+        return False
+
+    def export_to_telegraph(self, content: str):
+        telegraph = Telegraph(TELEGRAPH_USER_TOKEN)
+
+        if self.is_changed():
+            telegraph_response = telegraph.create_page(title=self.title, html_content=content)
+
+        else:
+            telegraph_response = telegraph.edit_page(path=self.telegraph_url, title=self.title, html_content=content)
+
+        print(telegraph_response)
+
+    async def foo(self, content: str):
+        from aiograph import Telegraph
+        telegraph = Telegraph(TELEGRAPH_USER_TOKEN)
+        if self.is_changed():
+            await telegraph.edit_page(path=self.telegraph_url, title=self.title, content=content)
+        else:
+            await telegraph.create_page(title=self.title, content=content)
 
 
 class Routing(BaseModel):
