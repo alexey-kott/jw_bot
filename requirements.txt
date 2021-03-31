@@ -8,7 +8,7 @@ bs4==0.0.1
 certifi==2018.10.15
 chardet==3.0.4
 idna==2.7
-lxml==4.2.5
+lxml==4.6.3
 multidict==4.4.2
 peewee==3.7.1
 pkg-resources==0.0.0
