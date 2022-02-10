@@ -11,18 +11,28 @@ from aiogram.types.reply_keyboard import ReplyKeyboardMarkup, KeyboardButton, Re
 
 from common_functions import init_routing
 from config import BOT_TOKEN, ACCESS_CONTROL_CHANNEL_ID
-from models import User, Routing, Article, Journal, JournalIssue
+from models import User, Routing, Article, Journal, JournalIssue, init_db
 from jw_watcher import JWWatcher
 from string_resources import STRESS
 
-bot = Bot(token=BOT_TOKEN, proxy="socks5://163.172.152.192:1080")
+bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(bot)
+
+TELEGRAPH_URL = "https://telegra.ph/"
 
 
 logging.basicConfig(level=logging.ERROR,
                     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                     datefmt='%m-%d %H:%M',
                     filename='./logs/log')
+
+
+def check_access(func, *args, **kwargs):
+    print(func)
+
+    async def wrapped():
+        return await func()
+    return wrapped
 
 
 @dp.message_handler(commands=['ping'])
@@ -32,11 +42,7 @@ async def ping(message: Message):
 
 @dp.message_handler(commands=['init'])
 async def init(message: Message):
-    User.create_table(fail_silently=True)
-    Article.create_table(fail_silently=True)
-    Routing.create_table(fail_silently=True)
-    Journal.create_table(fail_silently=True)
-    JournalIssue.create_table(fail_silently=True)
+    init_db()
     init_routing()
     await message.reply('Init successful')
 
@@ -101,20 +107,23 @@ async def select_journal_year(user: User, data: dict):
                                       .where(JournalIssue.journal == journal).distinct()
                                       .order_by(JournalIssue.year.desc())):
         callback_data = {
-            'action': 'select_journal_issue',
+            'action': 'select_issue',
             'journal_id': data['journal_id'],
+            'year': journal_issue.year
         }
+        n = len(json.dumps(callback_data))
         keyboard.add(InlineKeyboardButton(text=journal_issue.year, callback_data=json.dumps(callback_data)))
     await bot.send_message(user.user_id, 'Выберите год:', reply_markup=keyboard)
 
 
-async def select_journal_issue(user: User, data: dict):
+async def select_issue(user: User, data: dict):
     keyboard = InlineKeyboardMarkup(row_width=2)
     journal = Journal.get(Journal.id == data['journal_id'])
-    for journal_issue in JournalIssue.select().where(JournalIssue.journal == journal).order_by(JournalIssue.number):
+    year = data.get('year', 2021)
+    for journal_issue in JournalIssue.select().where(JournalIssue.journal == journal, JournalIssue.year == year).order_by(JournalIssue.number):
         if len(journal_issue.articles) == 0:
             continue
-        callback_data = {
+        callback_data = {  # max length 64 symbols
             'action': 'select_article',
             'journal_issue_id': journal_issue.id
         }
@@ -140,7 +149,7 @@ async def select_article(user: User, data: dict):
 
 async def send_article(user: User, data: dict):
     article = Article.get(Article.id == data['article_id'])
-    await bot.send_message(user.user_id, article.telegraph_url)
+    await bot.send_message(user.user_id, f"{TELEGRAPH_URL}{article.telegraph_path}")
 
 
 async def set_access(user: User, data: dict):

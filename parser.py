@@ -3,7 +3,6 @@ import asyncio
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 
-
 MAIN_URL = "https://www.jw.org/ru"
 
 
@@ -19,7 +18,6 @@ async def parse_journals_per_year(session: ClientSession, year: str):
         journal_links = soup.find_all("div", class_="publicationDesc")
         for i in journal_links:
             print(i)
-
 
 
 async def parse_journals(session: ClientSession):

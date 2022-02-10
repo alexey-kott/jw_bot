@@ -2,13 +2,21 @@ from typing import Union
 
 from aiogram.types import Message, CallbackQuery
 from peewee import Model, SqliteDatabase, TextField, IntegerField, CompositeKey, CharField, ForeignKeyField, \
-    BooleanField, PostgresqlDatabase
+    BooleanField, PostgresqlDatabase, DoesNotExist
 from telegraph import Telegraph
 
 from config import TELEGRAPH_USER_TOKEN
 
 db = SqliteDatabase('db.sqlite3')
 # db = PostgresqlDatabase()
+
+
+def init_db():
+    User.create_table(fail_silently=True)
+    Article.create_table(fail_silently=True)
+    Routing.create_table(fail_silently=True)
+    Journal.create_table(fail_silently=True)
+    JournalIssue.create_table(fail_silently=True)
 
 
 class BaseModel(Model):
@@ -30,9 +38,9 @@ class User(BaseModel):
         if isinstance(data, CallbackQuery) or isinstance(data, Message):
             try:
                 return cls.get(user_id=data.from_user.id)
-            except Exception as e:
+            except DoesNotExist:
                 try:
-                    return cls.create(id=data.from_user.id,
+                    return cls.create(user_id=data.from_user.id,
                                       username=data.from_user.username,
                                       first_name=data.from_user.first_name,
                                       last_name=data.from_user.last_name)
@@ -65,9 +73,10 @@ class JournalIssue(BaseModel):
 class Article(BaseModel):
     title = TextField(unique=True)
     url = TextField(unique=True)
-    telegraph_url = TextField()
+    telegraph_path = TextField()
     journal_issue = ForeignKeyField(JournalIssue, backref='articles')
     content_hash = TextField()  # хэш от суммы компонентов статьи (иллюстрация, заголовок, текст),
+    exported = BooleanField(default=False)
 
     #  если он изменился -- заново экспортируем статью в telegraph
 
@@ -81,17 +90,9 @@ class Article(BaseModel):
             telegraph_response = telegraph.create_page(title=self.title, html_content=content)
 
         else:
-            telegraph_response = telegraph.edit_page(path=self.telegraph_url, title=self.title, html_content=content)
+            telegraph_response = telegraph.edit_page(path=self.telegraph_path, title=self.title, html_content=content)
 
         print(telegraph_response)
-
-    async def foo(self, content: str):
-        from aiograph import Telegraph
-        telegraph = Telegraph(TELEGRAPH_USER_TOKEN)
-        if self.is_changed():
-            await telegraph.edit_page(path=self.telegraph_url, title=self.title, content=content)
-        else:
-            await telegraph.create_page(title=self.title, content=content)
 
 
 class Routing(BaseModel):
